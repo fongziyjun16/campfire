@@ -37,11 +37,15 @@ This application is a distributed, micro-service application based on Spring Clo
 
 ### Group or Personal Task Arrangment
 
+Integrated with [react-big-calendar](https://github.com/jquense/react-big-calendar)
+
 ![task_arrangement_01](./imgs/task_arrangement_01.png)
 
 ![task_arrangement_02](./imgs/task_arrangement_02.png)
 
 ### Notes
+
+Integrated with [Editor.js](https://github.com/codex-team/editor.js)
 
 ![note_01](./imgs/note_01.png)
 
