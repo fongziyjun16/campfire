@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.file.repository.GroupFileRepository">
+    <insert id="batchInsert">
+        insert into group_file(id, creator_id, username, group_directory_id, display_name, filename, size) values
+        <foreach collection="files" item="file" separator=",">
+            (#{file.id}, #{file.creatorId}, #{file.username}, #{file.groupDirectoryId}, #{file.displayName}, #{file.filename}, #{file.size})
+        </foreach>
+    </insert>
+
+    <delete id="deleteById">
+        delete from group_file
+        where id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        update group_file set status = #{status}
+        where id = #{id}
+    </update>
+
+    <select id="queryById">
+        select * from group_file
+        where id = #{id}
+    </select>
+
+    <sql id="queryGroupFiles">
+        select * from group_file
+        where group_directory_id = ${groupDirectoryId}
+        order by created_time desc
+    </sql>
+
+    <select id="countGroupFiles">
+        select count(*) from (
+            <include refid="queryGroupFiles"/>
+        ) gfs
+    </select>
+
+    <select id="queryGroupFilesByPage">
+        select gfs.*, (@no := @no + 1) as seq_no from (
+            <include refid="queryGroupFiles"/>
+        )gfs, (select @no := 0) B
+        order by seq_no
+        limit #{limit} offset #{offset}
+    </select>
+</mapper>

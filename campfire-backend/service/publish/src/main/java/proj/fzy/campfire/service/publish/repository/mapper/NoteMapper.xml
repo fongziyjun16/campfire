@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.publish.repository.NoteRepository">
+    <insert id="insert">
+        insert into note(id, creator_id, title, content)
+        value(#{id}, #{creatorId}, #{title}, #{content})
+    </insert>
+
+    <update id="updateById">
+        update note set title = #{title}, content = #{content}
+        where id = #{id}
+    </update>
+
+    <select id="queryById">
+        select * from note
+        where id = #{id}
+    </select>
+
+    <sql id="queryNoteHeads">
+        select * from note
+        where creator_id = ${accountId}
+        order by updated_time desc
+    </sql>
+
+    <select id="countNoteHeads">
+        select count(*) from (
+            <include refid="queryNoteHeads"/>
+        ) ns
+    </select>
+
+    <select id="queryNoteHeadsByPage">
+        select ns.*, (@no := @no + 1) as seq_no
+        from (
+            <include refid="queryNoteHeads"/>
+        ) ns, (select @no := 0) B
+        order by seq_no
+        limit #{limit} offset #{offset}
+    </select>
+
+</mapper>

@@ -1,0 +1,47 @@
+server:
+  port: ${PORT:10041}
+machine-id:
+  datacenter-id: 4
+  worker-id: 1
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:10101/eureka
+spring:
+  application:
+    name: email-service
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-center
+      name: campfire
+      profile: db, rabbitmq
+    function:
+      definition: receiveEmailAccountVerificationMessage;receiveEmailPasswordResetMessage
+    stream:
+      bindings:
+        receiveEmailAccountVerificationMessage-in-0:
+          destination: email_account_verification
+          group: EmailAccountVerificationGroup
+        receiveEmailPasswordResetMessage-in-0:
+          destination: email_password_reset
+          group: EmailPasswordResetGroup
+  mail:
+    host: smtp.office365.com
+    port: 587
+    username: campfire.official@outlook.com
+    password: Campfire2023!
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh"

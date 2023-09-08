@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.relationship.repository.GroupRepository">
+    <insert id="insert">
+        insert into `group`(id, creator_id, name, description)
+        value(#{id}, #{creatorId}, #{name}, #{description})
+    </insert>
+
+    <delete id="deleteById">
+        delete from `group` where id = #{id}
+    </delete>
+
+    <select id="queryById">
+        select * from `group`
+        where id = #{id}
+    </select>
+
+    <sql id="queryJoiningInGroups">
+        select g.id, g.name, gls.leader_id
+        from
+            joining j, `group` g,
+            (
+                select group_id, account_id as leader_id from joining j
+                where `role` = 'LEADER'
+            ) gls
+        where
+            j.account_id = ${accountId} and
+            j.status = 'IN' and
+            j.group_id = g.id and
+            j.group_id = gls.group_id
+    </sql>
+
+    <select id="countJoiningInGroups">
+        select count(*) from (
+            <include refid="queryJoiningInGroups"/>
+        ) gs
+    </select>
+
+    <select id="queryJoiningInGroupsByPage">
+        select * from (
+            <include refid="queryJoiningInGroups"/>
+        ) gs
+        limit #{limit} offset #{offset}
+    </select>
+
+    <sql id="queryNotJoinInGroups">
+        select g.id, g.name, g.description from
+            `group` g left join joining j on
+                g.id = j.group_id and j.account_id = ${accountId}
+        where g.status = 'ACTIVE' and j.id is null and g.name like '${searchingName}'
+    </sql>
+
+    <select id="countNotJoinInGroups">
+        select count(*) from (
+            <include refid="queryNotJoinInGroups"/>
+        ) gs
+    </select>
+
+    <select id="queryNotJoinInGroupsByPage">
+        select * from (
+            <include refid="queryNotJoinInGroups"/>
+        ) gs
+        limit #{limit} offset #{offset}
+    </select>
+
+    <sql id="queryWaitingJoinInGroups">
+        select g.id, g.name, g.description, j.comment, j.join_time from
+            `group` g left join joining j on
+                g.id = j.group_id and j.account_id = ${accountId}
+        where j.status = 'WAITING'
+    </sql>
+
+    <select id="countWaitingJoinInGroups">
+        select count(*) from (
+            <include refid="queryWaitingJoinInGroups"/>
+        ) gs
+    </select>
+
+    <select id="queryWaitingJoinInGroupsByPage">
+        select * from (
+            <include refid="queryWaitingJoinInGroups"/>
+        ) gs
+        limit #{limit} offset #{offset}
+    </select>
+
+    <sql id="queryJoinInRequests">
+        select * from joining
+        where status = 'WAITING' and group_id = ${groupId}
+    </sql>
+
+    <select id="countJoinInRequests">
+        select count(*) from (
+            <include refid="queryJoinInRequests"/>
+        ) js
+    </select>
+
+    <select id="queryJoinInRequestsByPage">
+        select * from (
+            <include refid="queryJoinInRequests"/>
+        ) js
+        limit #{limit} offset #{offset}
+    </select>
+
+    <sql id="queryGroupMembers">
+        select * from joining
+        where status = 'IN' and
+            group_id = ${groupId} and
+            account_id != ${accountId}
+    </sql>
+
+    <select id="countGroupMembers">
+        select count(*) from (
+            <include refid="queryGroupMembers"/>
+        ) ms
+    </select>
+
+    <select id="queryGroupMembersByPage">
+        select * from (
+            <include refid="queryGroupMembers"/>
+        ) ms
+        limit #{limit} offset #{offset}
+    </select>
+
+</mapper>

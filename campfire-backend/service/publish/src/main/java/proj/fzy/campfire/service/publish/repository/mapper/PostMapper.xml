@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.publish.repository.PostRepository">
+    <insert id="insert">
+        insert into post(id, creator_id, group_id, username, title, content)
+        value(#{id}, #{creatorId}, #{groupId}, #{username}, #{title}, #{content})
+    </insert>
+
+    <update id="updatePostStatusById">
+        update post set status = #{status}
+        where id = #{postId}
+    </update>
+
+    <select id="queryById">
+        select * from post
+        where id = #{id}
+    </select>
+
+    <sql id="queryGroupPosts">
+        select * from post p
+        where
+            group_id = ${groupId}
+            <if test="!statuses.isEmpty()">
+                <foreach collection="statuses" item="status" open="and (" separator="or" close=")">
+                    status = '${status}'
+                </foreach>
+            </if>
+        order by created_time desc
+    </sql>
+
+    <select id="countGroupPosts">
+        select count(*) from (
+            <include refid="queryGroupPosts"/>
+        ) ps
+    </select>
+
+    <select id="queryGroupPostsByPage">
+        select ps.*, (@no := @no + 1) as seq_no
+        from (
+            <include refid="queryGroupPosts"/>
+        ) ps, (select @no := 0) B
+        order by seq_no
+        limit #{limit} offset #{offset}
+    </select>
+
+</mapper>

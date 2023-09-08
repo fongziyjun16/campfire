@@ -1,0 +1,71 @@
+server:
+  port: ${PORT:80}
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:10101/eureka
+spring:
+  application:
+    name: gateway
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-center
+      name: campfire
+      profile: jwt, rabbitmq
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: 'http://localhost:3000'
+            allowedMethods:
+              - OPTIONS
+              - POST
+              - DELETE
+              - PUT
+              - PATCH
+              - GET
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+            allowCredentials: true
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/account/**, /role/**
+        - id: relationship-service
+          uri: lb://relationship-service
+          predicates:
+            - Path=/contact/**, /group/**
+        - id: task-service
+          uri: lb://task-service
+          predicates:
+            - Path=/task/**
+        - id: publish-service
+          uri: lb://publish-service
+          predicates:
+            - Path=/post/**, /note/**, /comment/**
+        - id: file-service
+          uri: lb://file-service
+          predicates:
+            - Path=/upload/**, /download/**, /file/info/**
+        - id: message-ws-service
+          uri: lb:ws://message-service
+          predicates:
+            - Path=/ws-connect
+        - id: message-service
+          uri: lb://message-service
+          predicates:
+            - Path=/notification/**, /group-chat/**, /contact-chat/**
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh"

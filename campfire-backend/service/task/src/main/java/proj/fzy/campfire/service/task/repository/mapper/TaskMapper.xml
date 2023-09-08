@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.task.repository.TaskRepository">
+    <insert id="insertTask">
+        insert into task(
+            id, creator_id, owner_type, owner_id,
+            title, content,
+            start_date, start_time,
+            end_date, end_time)
+        value(
+            #{id}, #{creatorId}, #{ownerType}, #{ownerId},
+            #{title}, #{content},
+            #{startDate}, #{startTime},
+            #{endDate}, #{endTime})
+    </insert>
+
+    <insert id="insertTaskCompletion">
+        insert into task_completion(task_id, account_id, username, comment)
+        value(#{taskId}, #{accountId}, #{username}, #{comment})
+    </insert>
+
+    <delete id="deleteTask">
+        delete from task where id = #{id}
+    </delete>
+
+    <delete id="deleteTaskCompletion">
+        delete from task_completion where task_id = #{taskId}
+    </delete>
+
+    <select id="queryTaskById">
+        select * from task
+        where id = #{id}
+    </select>
+
+    <select id="queryTasksByMonth">
+        select * from task
+        where owner_type = #{ownerType} and
+            owner_id = #{ownerId} and
+            (MONTH(start_date) = #{month} or MONTH(end_date) = #{month})
+    </select>
+
+    <select id="queryTaskCompletion">
+        select * from task_completion
+        where task_id = #{taskId} and account_id = #{accountId}
+    </select>
+
+    <select id="queryTaskCompletions">
+        select * from task_completion
+        where task_id = #{taskId}
+    </select>
+</mapper>

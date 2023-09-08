@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.file.repository.GroupDirectoryRepository">
+    <insert id="insert">
+        insert into group_directory(id, group_id)
+        value (#{id}, #{groupId})
+    </insert>
+
+    <update id="updateAvailableSizeById">
+        update group_directory set available_size = #{availableSize}
+        where id = #{id}
+    </update>
+
+    <select id="queryById">
+        select * from group_directory
+        where id = #{id}
+    </select>
+
+    <select id="queryByGroupId">
+        select * from group_directory
+        where group_id = #{groupId}
+    </select>
+</mapper>

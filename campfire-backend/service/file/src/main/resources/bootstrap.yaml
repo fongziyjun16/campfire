@@ -1,0 +1,35 @@
+server:
+  port: ${PORT:10051}
+machine-id:
+  datacenter-id: 5
+  worker-id: 1
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:10101/eureka
+spring:
+  application:
+    name: file-service
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-center
+      name: campfire
+      profile: jwt, db, rabbitmq
+  servlet:
+    multipart:
+      max-file-size: 64MB
+      max-request-size: 64MB
+file-storage:
+  bucket-location: ${BUCKET_LOCATION:${user.home}/Documents/Proj/Campfire/campfire-backend}
+  domain: ${DOMAIN:http://localhost}
+mybatis:
+  mapper-locations: classpath:proj/fzy/campfire/service/file/repository/mapper/*.xml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh"

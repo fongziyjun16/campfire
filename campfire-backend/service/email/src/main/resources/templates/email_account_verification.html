@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Campfire Account Verification Code Notification</title>
+</head>
+<body>
+    <h1>Account Verification Code</h1>
+    <p>Verification Code: </p>
+    <p><span th:text="${code}"></span></p>
+    <p>This code will be valid in 10 minutes</p>
+    <p>If you didn't request this code, you can safely ignore this email. Someone else might have typed your email address by mistake.</p>
+    <p>
+        Thanks,<br/>
+        The Campfire account Team
+    </p>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.message.repository.ContactChatRepository">
+    <insert id="insertContactChat">
+        insert into contact_chat(id)
+        value(#{id})
+    </insert>
+
+    <insert id="insertAccountContactChat">
+        insert into account_contact_chat(contact_chat_id, account_id, username)
+        value(#{contactChatId}, #{accountId}, #{username})
+    </insert>
+
+    <insert id="insertContactMessage">
+        insert into contact_message(id, contact_chat_id, creator_id, content)
+        value(#{id}, #{contactChatId}, #{creatorId}, #{content})
+    </insert>
+
+    <delete id="deleteContactChatByContactChatId">
+        delete from contact_chat where id = #{contactChatId}
+    </delete>
+
+    <delete id="deleteAccountContactChatByContactChatId">
+        delete from account_contact_chat where contact_chat_id = #{contactChatId}
+    </delete>
+
+    <delete id="deleteContactMessageByContactChatId">
+        delete from contact_message where contact_chat_id = #{contactChatId}
+    </delete>
+
+    <update id="updateLastReadTime">
+        update account_contact_chat set last_read_time = CURRENT_TIMESTAMP
+        where contact_chat_id = #{contactChatId} and account_id = #{accountId}
+    </update>
+
+    <select id="queryContactChatByTwoAccountIds">
+        select * from contact_chat cc
+        where cc.id in (
+            select contact_chat_id from account_contact_chat where account_id = #{alphaAccountId}
+            intersect
+            select contact_chat_id from account_contact_chat where account_id = #{betaAccountId}
+        )
+    </select>
+
+    <select id="countContactChat">
+        select count(*) from account_contact_chat
+        where
+            contact_chat_id in (
+                select contact_chat_id  from account_contact_chat
+                where account_id = #{accountId}
+            )
+            and
+            account_id != #{accountId}
+    </select>
+
+    <sql id="queryContactChatHeads">
+        select acc.contact_chat_id as id, acc.account_id as target_id, acc.username as target_username,
+               IF(cms.latest_message_time is not null and acc.last_read_time &lt; cms.latest_message_time, 'UNREAD', 'READ') as read_status
+        from
+            (
+                select acc1.contact_chat_id, acc2.account_id, acc2.username, acc1.last_read_time
+                from account_contact_chat acc1, account_contact_chat acc2
+                where
+                    acc1.contact_chat_id = acc2.contact_chat_id and
+                    acc1.account_id != acc2.account_id and
+                    acc1.account_id = ${accountId}
+            ) acc
+            left join
+            (
+                select cms.contact_chat_id, max(cms.created_time) as latest_message_time from (
+                    select * from contact_message cm
+                    where cm.contact_chat_id in (
+                        select contact_chat_id from account_contact_chat
+                        where account_id = ${accountId}
+                    )
+                ) cms
+                group by cms.contact_chat_id
+            ) cms
+            on acc.contact_chat_id = cms.contact_chat_id
+        where acc.account_id != ${accountId}
+        order by coalesce(cms.latest_message_time, acc.last_read_time) desc
+    </sql>
+
+    <select id="queryContactChatHead">
+        select * from (
+            <include refid="queryContactChatHeads"/>
+        ) chats
+        where id = #{contactChatId}
+    </select>
+
+    <select id="queryContactChatHeadsByPage">
+        select cch.*, (@no := @no + 1) as seq_no from (
+            <include refid="queryContactChatHeads"/>
+        ) cch, (select @no := 0) B
+        order by seq_no
+        limit #{limit} offset #{offset}
+    </select>
+
+    <sql id="queryContactMessages">
+        select * from contact_message cm
+        where cm.contact_chat_id = (
+            select acc1.contact_chat_id
+            from account_contact_chat acc1, account_contact_chat acc2
+            where
+                acc1.contact_chat_id = acc2.contact_chat_id and
+                acc1.account_id != acc2.account_id and
+                acc1.account_id = ${requesterId} and
+                acc2.account_id = ${targetId}
+        )
+        order by cm.created_time desc
+    </sql>
+
+    <select id="queryContactMessageById">
+        select * from contact_message
+        where id = #{id}
+    </select>
+
+    <select id="countContactMessage">
+        select count(*) from (
+            <include refid="queryContactMessages"/>
+        ) message
+    </select>
+
+    <select id="queryContactMessagesByPage">
+        select cms.*, (@no := @no + 1) as seq_no
+        from (
+            <include refid="queryContactMessages"/>
+        ) cms, (select @no := 0) B
+        order by seq_no
+        limit #{limit} offset #{offset}
+    </select>
+
+</mapper>

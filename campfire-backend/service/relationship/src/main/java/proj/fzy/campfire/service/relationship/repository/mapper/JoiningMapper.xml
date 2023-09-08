@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.relationship.repository.JoiningRepository">
+    <insert id="insert">
+        insert into joining(id, account_id, username, group_id, role, status, comment)
+        value(#{id}, #{accountId}, #{username}, #{groupId}, #{role}, #{status}, #{comment})
+    </insert>
+
+    <delete id="deleteById">
+        delete from joining where id = #{id}
+    </delete>
+
+    <delete id="deleteByGroupId">
+        delete from joining where group_id = #{groupId}
+    </delete>
+
+    <update id="update" parameterType="Joining">
+        update joining
+        set role = #{role}, status = #{status}, comment = #{comment}, join_time = #{joinTime}
+        where id = #{id}
+    </update>
+
+    <update id="updateRole">
+        update joining set role = #{role}
+        where id = #{id}
+    </update>
+
+    <select id="queryByAccountIdAndGroupId">
+        select * from joining
+        where account_id = #{accountId} and group_id = #{groupId}
+    </select>
+
+    <select id="queryById">
+        select * from joining
+        where id = #{id}
+    </select>
+
+    <select id="queryGroupJoinings">
+        select * from joining
+        where group_id = #{groupId}
+    </select>
+</mapper>

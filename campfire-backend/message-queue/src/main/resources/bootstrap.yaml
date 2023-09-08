@@ -1,0 +1,31 @@
+server:
+  port: 10401
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:10101/eureka
+spring:
+  application:
+    name: message-queue
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-center
+      name: campfire
+      profile: rabbitmq
+    function:
+      definition: publishEmailAccountVerificationMessage;publishEmailPasswordResetMessage
+    stream:
+      bindings:
+        publishEmailAccountVerificationMessage-out-0:
+          destination: email_account_verification
+        publishEmailPasswordResetMessage-out-0:
+          destination: email_password_reset
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh"

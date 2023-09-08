@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.relationship.repository.ContactRepository">
+    <insert id="insert">
+        insert into contact(id, source_id, source_username, target_id, target_username, comment)
+        value(#{id}, #{sourceId}, #{sourceUsername}, #{targetId}, #{targetUsername}, #{comment})
+    </insert>
+
+    <update id="updateStatus">
+        update contact set status = #{status}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from contact where id = #{id}
+    </delete>
+
+    <select id="queryByAccountIds">
+        select * from contact
+        where (source_id = #{accountId1} and target_id = #{accountId2}) || (source_id = #{accountId2} and target_id = #{accountId1})
+    </select>
+
+    <select id="queryById">
+        select * from contact
+        where id = #{id}
+    </select>
+
+    <sql id="queryContacts">
+        select * from contact
+        <if test="queryType == 'ACCEPT'">
+            where status = "ACCEPT" and (source_id = ${accountId} or target_id = ${accountId})
+        </if>
+        <if test="queryType == 'WAITING'">
+            where status = "WAITING" and source_id = ${accountId}
+        </if>
+        <if test="queryType == 'CONTACT_REQUEST'">
+            where status = "WAITING" and target_id = ${accountId}
+        </if>
+    </sql>
+
+    <select id="countQueryContacts">
+        select count(*) from (
+            <include refid="queryContacts"/>
+        ) cs
+    </select>
+
+    <select id="queryQueryContactsByPage">
+        select * from (
+            <include refid="queryContacts"/>
+        ) cs
+        limit #{limit} offset #{offset}
+    </select>
+
+</mapper>

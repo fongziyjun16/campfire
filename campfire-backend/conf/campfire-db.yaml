@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/campfire
+    username: root
+    password: admin111
+mybatis:
+  configuration:
+    lazy-loading-enabled: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  type-aliases-package: proj.fzy.campfire.model.db
+seata:
+  tx-service-group: campfire_dtx_group
+  service:
+    vgroup-mapping:
+      campfire_dtx_group: default
+    grouplist:
+      default: localhost:8091

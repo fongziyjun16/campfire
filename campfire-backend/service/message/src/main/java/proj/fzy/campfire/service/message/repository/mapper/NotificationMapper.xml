@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.message.repository.NotificationRepository">
+    <insert id="insertNotification">
+        insert into notification(id, title, content, target_type)
+        value(#{id}, #{title}, #{content}, #{targetType})
+    </insert>
+
+    <insert id="insertAccountNotification">
+        insert into account_notification(notification_id, target_id, read_status)
+        value(#{notificationId}, #{targetId}, #{readStatus})
+    </insert>
+
+    <update id="updateAccountNotificationReadStatus">
+        update account_notification set read_status = #{readStatus}
+        where notification_id = #{notificationId} and target_id = #{targetId}
+    </update>
+
+    <select id="queryNotificationById">
+        select * from notification
+        where id = #{id}
+    </select>
+
+    <sql id="queryNotificationHeads">
+        select * from (
+            select n.id, n.target_type, n.title, IFNULL(an.read_status, 'UNREAD') as read_status, n.created_time
+            from notification n left join account_notification an on n.id = an.notification_id and an.target_id = ${accountId}
+            where target_type = 'PUBLIC'
+            union
+            select n.id, n.target_type, n.title, IFNULL(an.read_status, 'UNREAD') as read_status, n.created_time
+            from notification n, account_notification an
+            where target_type = 'PRIVATE' and n.id = an.notification_id and an.target_id = ${accountId}
+        ) notifications
+        order by created_time desc
+    </sql>
+
+    <select id="countNotificationHeads">
+        select count(*) from (
+            <include refid="queryNotificationHeads"/>
+        ) ns
+    </select>
+
+    <select id="queryNotificationHeadsByPage">
+        select * from (
+            <include refid="queryNotificationHeads"/>
+        ) ns
+        limit #{limit} offset #{offset}
+    </select>
+
+    <select id="queryMoreNotificationHeads">
+        select * from (
+            <include refid="queryNotificationHeads"/>
+        ) ns
+        where ns.id &lt; #{afterNotificationId}
+        limit #{limit}
+    </select>
+
+    <select id="queryAccountNotificationByIds">
+        select * from account_notification
+        where notification_id = #{notificationId} and target_id = #{targetId}
+    </select>
+</mapper>

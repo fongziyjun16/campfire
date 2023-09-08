@@ -1,0 +1,32 @@
+server:
+  port: ${PORT:10021}
+machine-id:
+  datacenter-id: 2
+  worker-id: 1
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:10101/eureka
+spring:
+  application:
+    name: relationship-service
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-center
+      name: campfire
+      profile: jwt, db, rabbitmq
+mybatis:
+  mapper-locations: classpath:proj/fzy/campfire/service/relationship/repository/mapper/*.xml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh"
+logging:
+  level:
+    proj.fzy.campfire.servicecalling: debug
+

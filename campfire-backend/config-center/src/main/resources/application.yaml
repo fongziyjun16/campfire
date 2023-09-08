@@ -1,0 +1,29 @@
+server:
+  port: 10201
+spring:
+  application:
+    name: config-center
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations:
+            - file://${user.home}/Documents/Proj/Campfire/campfire-backend/conf
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:10101/eureka #, http://localhost:10102/eureka
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "busrefresh"

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proj.fzy.campfire.service.message.repository.GroupChatRepository">
+    <insert id="insertGroupChat">
+        insert into group_chat(id, group_id, group_name)
+        value(#{id}, #{groupId}, #{groupName})
+    </insert>
+
+    <insert id="insertAccountGroupChat">
+        insert into account_group_chat(group_chat_id, account_id, username)
+        value(#{groupChatId}, #{accountId}, #{username})
+    </insert>
+
+    <insert id="insertGroupMessage">
+        insert into group_message(id, group_chat_id, creator_id, content)
+        value(#{id}, #{groupChatId}, #{creatorId}, #{content})
+    </insert>
+
+    <delete id="leaveGroupChat">
+        delete from account_group_chat
+        where group_chat_id = (select id from group_chat where group_id = #{groupId}) and account_id = #{accountId}
+    </delete>
+
+    <delete id="deleteGroupChatByGroupId">
+        delete from group_chat where group_id = #{groupId}
+    </delete>
+
+    <delete id="deleteAccountGroupChatByGroupChatId">
+        delete from account_group_chat where group_chat_id = #{groupChatId}
+    </delete>
+
+    <delete id="deleteGroupMessageByGroupChatId">
+        delete from group_message where group_chat_id = #{groupChatId}
+    </delete>
+
+    <update id="updateLastReadTime">
+        update account_group_chat set last_read_time = CURRENT_TIMESTAMP
+        where group_chat_id = #{groupChatId} and account_id = #{accountId}
+    </update>
+
+    <select id="queryAccountGroupChatByIds">
+        select * from account_group_chat
+        where group_chat_id = #{groupChatId} and account_id = #{accountId}
+    </select>
+
+    <select id="queryGroupChatById">
+        select * from group_chat
+        where id = #{id}
+    </select>
+
+    <select id="queryGroupChatByGroupId">
+        select * from group_chat
+        where group_id = #{groupId}
+    </select>
+
+    <select id="queryGroupMessageById">
+        select * from group_message
+        where id = #{id}
+    </select>
+
+    <sql id="queryGroupChatHeads">
+        select agc.group_chat_id, agc.group_id, agc.group_name,
+               IF(gm.latest_message_time is not null and agc.last_read_time &lt; gm.latest_message_time, 'UNREAD', 'READ') as read_status
+        from (
+                select agc.group_chat_id, gc.group_id, gc.group_name, agc.last_read_time from group_chat gc, account_group_chat agc
+                where gc.id = agc.group_chat_id and account_id = ${accountId}
+            ) agc
+            left join
+            (
+                select group_chat_id, max(created_time) as latest_message_time from group_message
+                group by group_chat_id
+            ) gm
+            on agc.group_chat_id = gm.group_chat_id
+        order by coalesce(gm.latest_message_time, agc.last_read_time) desc
+    </sql>
+
+    <select id="countGroupChatHeads">
+        select count(*) from(
+            <include refid="queryGroupChatHeads"/>
+        ) gc
+    </select>
+
+    <select id="queryGroupChatHeadsByPage">
+        select gc.*, (@no := @no + 1) as seq_no from (
+            <include refid="queryGroupChatHeads"/>
+        ) gc, (select @no := 0) B
+        order by seq_no
+        limit #{limit} offset #{offset}
+    </select>
+
+    <select id="queryGroupChatHead">
+        select * from(
+            <include refid="queryGroupChatHeads"/>
+        ) gc
+        where group_chat_id = #{groupChatId}
+    </select>
+
+    <select id="queryGroupMembers">
+        select * from account_group_chat
+        where group_chat_id = #{groupChatId}
+    </select>
+
+    <sql id="queryGroupMessages">
+        select gms.id, agc.username, gms.content, gms.created_time
+        from (
+            select * from group_message gm
+            where group_chat_id = ${groupChatId}
+            order by created_time desc
+        ) gms, account_group_chat  agc
+        where gms.group_chat_id = agc.group_chat_id and gms.creator_id = agc.account_id
+        order by gms.created_time desc
+    </sql>
+
+    <select id="countGroupMessages">
+        select count(*) from(
+            <include refid="queryGroupMessages"/>
+        ) ms
+    </select>
+
+    <select id="queryGroupMessagesByPage">
+        select ms.*, (@no := @no + 1) as seq_no from (
+            <include refid="queryGroupMessages"/>
+        ) ms, (select @no := 0) B
+        order by seq_no
+        limit ${limit} offset ${offset}
+    </select>
+
+    <select id="queryGroupMessage">
+        select * from(
+            <include refid="queryGroupMessages"/>
+        ) ms
+        where id = #{groupMessageId}
+    </select>
+
+</mapper>
