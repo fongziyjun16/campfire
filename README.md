@@ -37,9 +37,9 @@ This application is a distributed, micro-service application based on Spring Clo
 
 ### Group or Personal Task Arrangment
 
-![task_arrangement_01](/Users/yjchen16/Documents/Proj/git_repo/campfire/imgs/task_arrangement_01.png)
+![task_arrangement_01](./imgs/task_arrangement_01.png)
 
-![task_arrangement_02](/Users/yjchen16/Documents/Proj/git_repo/campfire/imgs/task_arrangement_02.png)
+![task_arrangement_02](./imgs/task_arrangement_02.png)
 
 ### Notes
 
