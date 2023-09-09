@@ -23,6 +23,8 @@ This is an application for people who want to study together.  Grouping, Joining
 
 This application is a distributed, micro-service application based on Spring Cloud.
 
+Integrated with Spring Security for authorization.
+
 ### Beginning
 
 ![beginning01](./imgs/beginning01.png)
@@ -54,6 +56,10 @@ Integrated with [Editor.js](https://github.com/codex-team/editor.js)
 ![system_notifications_01](./imgs/system_notifications_01.png)
 
 ### Instant Message Service (Distributed)
+
+Support multiple message service servers working at the same time.
+
+Spring WebSocket & RabbitMQ
 
 ![instant_message01](./imgs/instant_message01.png)
 
