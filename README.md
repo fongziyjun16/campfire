@@ -35,6 +35,10 @@ Integrated with Spring Security for authorization.
 
 ### Group Activities
 
+Each group member can publish group posts.
+
+Each group has a limited space for group file storage.
+
 ![group_activities_01](./imgs/group_activities_01.png)
 
 ### Group or Personal Task Arrangment
